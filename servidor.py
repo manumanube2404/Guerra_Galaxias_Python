@@ -1,30 +1,24 @@
 import socket
 import threading
 import random
-import time
 import sys
 
-from Nave import TIPOS_NAVES, EstrellaDeLaMuerte, Ejecutor, HalconMilenario, NaveRealNaboo, CazaEstelarJedi
-from Mandaloriano import crear_mandaloriano
-from Reino import Reino
+from clases.Nave import TIPOS_NAVES, CLASES_NAVES
+from clases.Mandaloriano import crear_mandaloriano, STATS_MANDALORIANOS
+from clases.Reino import Reino
 
 HOST = '127.0.0.1'
 PORT = 65432
 MAX_CREDITOS = 100000
 
-CLASES_NAVES = {
-    1: EstrellaDeLaMuerte,
-    2: Ejecutor,
-    3: HalconMilenario,
-    4: NaveRealNaboo,
-    5: CazaEstelarJedi,
-}
+# --- Utilidades de comunicación ---
 
 def enviar(conn, mensaje):
-    data = (mensaje + "\n").encode()
-    conn.sendall(data)
+    conn.sendall((mensaje + "\n").encode())
+
 
 def recibir(conn):
+    """Lee una línea completa desde el socket y devuelve el texto sin saltos."""
     buffer = b""
     while True:
         chunk = conn.recv(1024)
@@ -32,71 +26,81 @@ def recibir(conn):
             break
         buffer += chunk
         if b"\n" in buffer:
-            linea, buffer = buffer.split(b"\n", 1)
+            linea, _ = buffer.split(b"\n", 1)
             return linea.decode().strip()
     return ""
 
+# --- Configuración del reino de cada cliente ---
+
 def configurar_reino(conn, numero):
-    enviar(conn, f"Introduce nombre de tu Reino:")
+    enviar(conn, "Introduce nombre de tu Reino:")
     nombre = recibir(conn)
-    reino = Reino(nombre)
+    while True:
+        reino = Reino(nombre)
 
-    enviar(conn, f"CREAMOS LA FLOTA DE NAVES")
-    for i in range(1, 6):
-        nombre_nave, clase, coste = TIPOS_NAVES[i]
-        while True:
-            enviar(conn, f"Número de Naves ({nombre_nave}): ")
-            try:
-                cantidad = int(recibir(conn))
-                if cantidad < 0:
-                    enviar(conn, "Introduce un número válido.")
-                    continue
-                coste_parcial = cantidad * coste
-                if reino.coste_total + coste_parcial > MAX_CREDITOS:
-                    enviar(conn, f"Créditos insuficientes. Disponibles: {MAX_CREDITOS - reino.coste_total}. Inténtalo de nuevo.")
-                    continue
-                for _ in range(cantidad):
-                    reino.agregar_nave(CLASES_NAVES[i]())
-                break
-            except ValueError:
-                enviar(conn, "Introduce un número válido.")
+        enviar(conn, "CREAMOS TU FLOTA GALÁCTICA")
+        for i in range(1, 6):
+            nombre_nave, _, coste = TIPOS_NAVES[i]
+            while True:
+                creditos_restantes = MAX_CREDITOS - reino.coste_total
+                enviar(conn, f"Tienes {creditos_restantes} créditos disponibles.")
+                enviar(conn, f"¿Cuántas naves '{nombre_nave}' quieres? (cada una cuesta {coste}):")
+                try:
+                    cantidad = int(recibir(conn))
+                    if cantidad < 0:
+                        enviar(conn, "Introduce un número entero no negativo.")
+                        continue
+                    if reino.coste_total + cantidad * coste > MAX_CREDITOS:
+                        faltan = reino.coste_total + cantidad * coste - MAX_CREDITOS
+                        enviar(conn, f"Créditos insuficientes. Te faltan {faltan} créditos.")
+                        continue
+                    for _ in range(cantidad):
+                        reino.agregar_nave(CLASES_NAVES[i]())
+                    break
+                except ValueError:
+                    enviar(conn, "Introduce un número válido, por ejemplo 0, 1, 2...")
 
-    from Mandaloriano import STATS_MANDALORIANOS
-    enviar(conn, f"CREAMOS LA LEGIÓN DE MANDALORIANOS")
-    for nivel in range(1, 6):
-        coste_mand = STATS_MANDALORIANOS[nivel][4]
-        while True:
-            enviar(conn, f"Número de Mandalorianos (Nivel {nivel}): ")
-            try:
-                cantidad = int(recibir(conn))
-                if cantidad < 0:
-                    enviar(conn, "Introduce un número válido.")
-                    continue
-                coste_parcial = cantidad * coste_mand
-                if reino.coste_total + coste_parcial > MAX_CREDITOS:
-                    enviar(conn, f"Créditos insuficientes. Disponibles: {MAX_CREDITOS - reino.coste_total}. Inténtalo de nuevo.")
-                    continue
-                for _ in range(cantidad):
-                    reino.agregar_mandaloriano(crear_mandaloriano(nivel))
-                break
-            except ValueError:
-                enviar(conn, "Introduce un número válido.")
+        enviar(conn, "CREAMOS TU LEGIÓN DE MANDALORIANOS")
+        for nivel in range(1, 6):
+            coste_mand = STATS_MANDALORIANOS[nivel][4]
+            while True:
+                creditos_restantes = MAX_CREDITOS - reino.coste_total
+                enviar(conn, f"Tienes {creditos_restantes} créditos disponibles.")
+                enviar(conn, f"¿Cuántos Mandalorianos de nivel {nivel} quieres? (cada uno cuesta {coste_mand}):")
+                try:
+                    cantidad = int(recibir(conn))
+                    if cantidad < 0:
+                        enviar(conn, "Introduce un número entero no negativo.")
+                        continue
+                    if reino.coste_total + cantidad * coste_mand > MAX_CREDITOS:
+                        faltan = reino.coste_total + cantidad * coste_mand - MAX_CREDITOS
+                        enviar(conn, f"Créditos insuficientes. Te faltan {faltan} créditos.")
+                        continue
+                    for _ in range(cantidad):
+                        reino.agregar_mandaloriano(crear_mandaloriano(nivel))
+                    break
+                except ValueError:
+                    enviar(conn, "Introduce un número válido, por ejemplo 0, 1, 2...")
 
-    enviar(conn, f"Coste total: {reino.coste_total} Créditos")
-    enviar(conn, "Configuración enviada. Esperando inicio batalla...")
+        if reino.unidades:
+            break
+        enviar(conn, "No puede haber un Reino sin unidades. Volvemos a configurar tu flota.")
+
+    enviar(conn, f"Coste total del Reino '{reino.nombre}': {reino.coste_total} créditos")
+    enviar(conn, "Configuración recibida. En breve comienza la batalla...")
     return reino
+
+# --- Lógica de batalla por turnos ---
 
 def simular_batalla(reino1, reino2, conn1, conn2):
     def broadcast(msg):
+        # Enviamos el mensaje a los dos clientes y lo mostramos en consola.
         print(msg)
-        try:
-            enviar(conn1, msg)
-        except:
-            pass
-        try:
-            enviar(conn2, msg)
-        except:
-            pass
+        for conn in (conn1, conn2):
+            try:
+                enviar(conn, msg)
+            except Exception:
+                pass
 
     broadcast(f"\n=== CAMPO DE BATALLA GALÁCTICO ===")
     broadcast(f"=== BATALLA: {reino1.nombre} vs {reino2.nombre} ===")
@@ -105,25 +109,25 @@ def simular_batalla(reino1, reino2, conn1, conn2):
     while reino1.sigue_en_pie() and reino2.sigue_en_pie():
         turno += 1
         broadcast(f"\n=== TURNO {turno} ===")
-        broadcast("COMBATES:")
+        broadcast("COMIENZA LA FASE DE ATAQUES")
 
-        unidades_r1 = reino1.naves_vivas() + reino1.mandalorianos_vivos()
-        unidades_r2 = reino2.naves_vivas() + reino2.mandalorianos_vivos()
-
-        combates = []
-        atacantes = list(unidades_r1) + list(unidades_r2)
+        atacantes = reino1.unidades_vivas() + reino2.unidades_vivas()
         random.shuffle(atacantes)
+        atacantes.sort(key=lambda unidad: unidad.velocidad, reverse=True)
 
         contador = 1
         for atacante in atacantes:
-            if atacante in unidades_r1:
-                objetivos = reino2.naves_vivas() + reino2.mandalorianos_vivos()
-                reino_atacante = reino1.nombre
-                reino_defensor = reino2.nombre
+            if not atacante.esta_viva():
+                continue
+
+            if atacante in reino1.unidades_vivas():
+                objetivos = reino2.unidades_vivas()
+                atacante_reino = reino1.nombre
+                defensa_reino = reino2.nombre
             else:
-                objetivos = reino1.naves_vivas() + reino1.mandalorianos_vivos()
-                reino_atacante = reino2.nombre
-                reino_defensor = reino1.nombre
+                objetivos = reino1.unidades_vivas()
+                atacante_reino = reino2.nombre
+                defensa_reino = reino1.nombre
 
             if not objetivos:
                 break
@@ -131,18 +135,10 @@ def simular_batalla(reino1, reino2, conn1, conn2):
             objetivo = random.choice(objetivos)
             danio = atacante.atacar()
             danio_real = objetivo.recibir_danio(danio)
+            muerto = not objetivo.esta_viva()
+            estado = "DESTRUIDO/ELIMINADO" if muerto else f"HERIDO (Vida: {objetivo.vida}/{objetivo.vida_max})"
 
-            if hasattr(objetivo, 'esta_viva'):
-                muerto = not objetivo.esta_viva()
-            else:
-                muerto = not objetivo.esta_vivo()
-
-            if muerto:
-                estado_str = "DESTRUIDO/ELIMINADO"
-            else:
-                estado_str = f"HERIDO (Vida: {objetivo.vida}/{objetivo.vida_max})"
-
-            broadcast(f"{contador}. {atacante.nombre} ({reino_atacante[:3]}) -> {objetivo.nombre} ({reino_defensor[:3]}) [DAÑO: {danio_real}] - {estado_str}")
+            broadcast(f"{contador}. {atacante.nombre} ({atacante_reino[:3]}) -> {objetivo.nombre} ({defensa_reino[:3]}) [DAÑO: {danio_real}] - {estado}")
             contador += 1
 
         broadcast(f"\nESTADO TURNO {turno}:")
@@ -150,77 +146,62 @@ def simular_batalla(reino1, reino2, conn1, conn2):
         broadcast(f"| {reino1.nombre:<20} | {len(reino1.naves_vivas()):^6} | {len(reino1.mandalorianos_vivos()):^13} |")
         broadcast(f"| {reino2.nombre:<20} | {len(reino2.naves_vivas()):^6} | {len(reino2.mandalorianos_vivos()):^13} |")
 
-        if not reino1.sigue_en_pie() or not reino2.sigue_en_pie():
-            break
-
     broadcast(f"\n=== RESULTADO FINAL DE LA GUERRA ===")
-    if reino1.sigue_en_pie():
-        ganador, perdedor = reino1, reino2
-    else:
-        ganador, perdedor = reino2, reino1
-
+    ganador, perdedor = (reino1, reino2) if reino1.sigue_en_pie() else (reino2, reino1)
     broadcast(f"GANADOR: {ganador.nombre}")
     broadcast(f"\nESTADÍSTICAS DE LA BATALLA:")
-    broadcast(f"| {'REINO':<25} | {'PÉRDIDAS':^12} | {'SOBREVIVIENTES':^14} |")
-    broadcast(f"| {reino1.nombre:<25} | {len(reino1.naves) - len(reino1.naves_vivas())} Naves, {len(reino1.mandalorianos) - len(reino1.mandalorianos_vivos())} Mand. | {len(reino1.naves_vivas())} Naves, {len(reino1.mandalorianos_vivos())} Mand. |")
-    broadcast(f"| {reino2.nombre:<25} | {len(reino2.naves) - len(reino2.naves_vivas())} Naves, {len(reino2.mandalorianos) - len(reino2.mandalorianos_vivos())} Mand. | {len(reino2.naves_vivas())} Naves, {len(reino2.mandalorianos_vivos())} Mand. |")
+    broadcast(f"| {'REINO':<25} | {'PÉRDIDAS':^18} | {'SOBREVIVIENTES':^18} |")
+    for reino in (reino1, reino2):
+        perdidas_naves, perdidas_mand = reino.calcula_perdidas()
+        perdidas = f"{perdidas_naves} Naves, {perdidas_mand} Mand."
+        sobrevivientes = f"{len(reino.naves_vivas())} Naves, {len(reino.mandalorianos_vivos())} Mand."
+        broadcast(f"| {reino.nombre:<25} | {perdidas:^18} | {sobrevivientes:^18} |")
+    broadcast(f"\nCOSTE TOTAL DE LA BATALLA: {reino1.coste_total + reino2.coste_total} créditos")
     broadcast(f"\nDuración: {turno} turnos")
 
     try:
-        if reino1 == ganador:
-            enviar(conn1, f"¡BATALLA TERMINADA! {ganador.nombre} - ¡GANADOR!")
-            enviar(conn2, f"¡DERROTA! {ganador.nombre} ha vencido.")
-        else:
-            enviar(conn2, f"¡BATALLA TERMINADA! {ganador.nombre} - ¡GANADOR!")
-            enviar(conn1, f"¡DERROTA! {ganador.nombre} ha vencido.")
-    except:
+        enviar(conn1, f"{'¡GANADOR!' if ganador == reino1 else '¡DERROTA!'} {ganador.nombre} ha vencido.")
+        enviar(conn2, f"{'¡GANADOR!' if ganador == reino2 else '¡DERROTA!'} {ganador.nombre} ha vencido.")
+    except Exception:
         pass
+
+# --- Gestión de conexiones ---
 
 def iniciar_guerra():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((HOST, PORT))
     server.listen(2)
-    server.settimeout(10)
+    server.settimeout(10)  # 10 segundos para que se conecten ambos clientes
 
     print("\nINICIANDO GUERRA GALÁCTICA")
     conexiones = []
-    try:
-        for i in range(1, 3):
-            print(f"Esperando conexión de Reino {i}...", end=" ", flush=True)
-            conn, addr = server.accept()
+    while len(conexiones) < 2:
+        try:
+            print(f"Esperando conexión de Reino {len(conexiones) + 1}...", end=" ", flush=True)
+            conn, _ = server.accept()
             print("[CONECTADO]")
             conexiones.append(conn)
-    except socket.timeout:
-        print("\nTIMEOUT - No se conectaron ambos reinos.")
-        print("Reiniciando servidor automáticamente...")
-        for c in conexiones:
-            c.close()
-        server.close()
-        return
+        except socket.timeout:
+            print("\nTIMEOUT - esperando que se conecten los reinos restantes...")
+            continue
 
     server.close()
 
-    reinos = []
-    hilos = []
     resultados = [None, None]
 
     def configurar(idx, conn):
         resultados[idx] = configurar_reino(conn, idx + 1)
 
-    for i, conn in enumerate(conexiones):
-        t = threading.Thread(target=configurar, args=(i, conn))
-        hilos.append(t)
-        t.start()
-
-    for t in hilos:
-        t.join()
+    hilos = [threading.Thread(target=configurar, args=(i, conn)) for i, conn in enumerate(conexiones)]
+    for h in hilos:
+        h.start()
+    for h in hilos:
+        h.join()
 
     reino1, reino2 = resultados
-    print(f"\n========================================")
-    print(f"CONFIGURACIÓN REINO 1: {reino1.nombre} - Coste: {reino1.coste_total}")
-    print(f"CONFIGURACIÓN REINO 2: {reino2.nombre} - Coste: {reino2.coste_total}")
-    print(f"Ambos Reinos configurados. INICIANDO BATALLA!")
+    print(f"\nREINO 1: {reino1.nombre} - {reino1.coste_total} créditos")
+    print(f"REINO 2: {reino2.nombre} - {reino2.coste_total} créditos")
 
     enviar(conexiones[0], "Ambos Reinos configurados correctamente. INICIANDO BATALLA.")
     enviar(conexiones[1], "Ambos Reinos configurados correctamente. INICIANDO BATALLA.")
@@ -229,6 +210,8 @@ def iniciar_guerra():
 
     for conn in conexiones:
         conn.close()
+
+# --- Menú principal del servidor ---
 
 def main():
     while True:
@@ -243,7 +226,8 @@ def main():
             print("Servidor finalizado.")
             sys.exit(0)
         else:
-            print("Opción no válida.")
+            print("Opción no válida. Elige 1 o 2.")
+
 
 if __name__ == "__main__":
     main()

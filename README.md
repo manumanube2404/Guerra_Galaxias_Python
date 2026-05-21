@@ -1,19 +1,29 @@
-# La Guerra de las Galaxias (2026)
+# La Guerra de las Galaxias 2026
 
-Sistema cliente-servidor de simulación de batalla galáctica en Python.
+## Estructura 
+
+- `servidor.py` - punto de entrada del servidor.
+- `cliente.py` - cliente de texto para participar en la partida.
+- `cliente_pygame.py` - cliente gráfico basado en Pygame.
+- `clases/` - módulo que contiene las clases del juego:
+  - `Nave.py`
+  - `Mandaloriano.py`
+  - `Reino.py`
 
 ## Ejecución
 
-1. Iniciar el servidor:
-```bash
-python servidor.py
-```
+1. Ejecuta primero el servidor:
+   ```bash
+   python servidor.py
+   ```
 
-2. En dos terminales distintas, iniciar cada cliente:
-```bash
-python cliente.py
-```
+2. Ejecuta dos clientes en otras terminales:
+   ```bash
+   python cliente.py
+   ```
+   o
+   ```bash
+   python cliente_pygame.py
+   ```
 
-## Reglas
-- Presupuesto máximo por reino: 100.000 Créditos
-- Si no se conectan los 2 clientes en 10 segundos, el servidor se reinicia
+3. Sigue las instrucciones de cada cliente para configurar los reinos y comenzar la batalla.
