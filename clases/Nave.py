@@ -1,7 +1,7 @@
 import random
 
 class Unidad:
-    """Clase base para cualquier unidad de combate del juego."""
+    # Clase base para cada unidad de combate del juego.
     def __init__(self, nombre, ataque, defensa, vida, velocidad, coste):
         self.nombre = nombre
         self.ataque = ataque
@@ -12,17 +12,17 @@ class Unidad:
         self.coste = coste
 
     def esta_viva(self):
-        """Devuelve True si la unidad aún tiene vida."""
+        # Devuelve True si la unidad aún tiene vida.
         return self.vida > 0
 
     def recibir_danio(self, danio):
-        """Aplica daño, resta defensa y actualiza la vida."""
+        # Aplica daño, resta defensa y actualiza la vida.
         danio_real = max(0, danio - self.defensa // 2)
         self.vida = max(0, self.vida - danio_real)
         return danio_real
 
     def atacar(self):
-        """Calcula cuántos puntos de daño hace este ataque."""
+        # Calcula cuántos puntos de daño hace este ataque.
         return random.randint(self.ataque, self.ataque * 2)
 
     def __str__(self):
@@ -30,7 +30,7 @@ class Unidad:
 
 
 class Nave(Unidad):
-    """Una nave espacial con estadísticas de combate."""
+    # Nave espacial con estadísticas de combate.
     def __init__(self, nombre, ataque, defensa, vida, velocidad, coste):
         super().__init__(nombre, ataque, defensa, vida, velocidad, coste)
 

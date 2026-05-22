@@ -6,8 +6,8 @@ PORT = 65432
 
 
 def main():
-    """Arranca el cliente y mantiene la conexión hasta que el servidor cierre."""
-    print("=== CLIENTE - LA GUERRA DE LAS GALAXIAS (2026) ===")
+    # Enciende el cliente y mantiene la conexión hasta que el servidor cierre.
+    print("CLIENTE - LA GUERRA DE LAS GALAXIAS")
     print("Conectando al servidor...", end=" ", flush=True)
 
     try:

@@ -6,7 +6,7 @@ import pygame
 HOST = '127.0.0.1'
 PORT = 65432
 
-# --- Colores y fuentes ---
+# Colores y fuentes
 NEGRO     = (0, 0, 0)
 AMARILLO  = (255, 215, 0)
 BLANCO    = (255, 255, 255)
@@ -19,15 +19,14 @@ ANCHO, ALTO = 900, 650
 MAX_LINEAS  = 22       # líneas visibles en el log
 FUENTE_TAM  = 18
 
-# --- Estado global compartido entre el hilo de red y el de pygame ---
 mensajes   = []        # log de mensajes del servidor
 esperando  = False     # indica si el servidor pide respuesta
-ultimo_msg = ""        # último prompt recibido
+ultimo_msg = ""        # último mensaje recibido
 lock       = threading.Lock()
 
-sock = None            # socket global
+sock = None
 
-# --- Hilo de red: recibe mensajes del servidor ---
+# Recibe mensajes del servidor
 
 def hilo_red():
     global esperando, ultimo_msg
@@ -57,7 +56,7 @@ def hilo_red():
                 mensajes.append(f">> Error de red: {e}")
             break
 
-# --- Dibujado principal ---
+# Visual principal
 
 def dibujar(screen, fuente, fuente_titulo, input_texto):
     screen.fill(AZUL_OSC)
@@ -93,7 +92,7 @@ def dibujar(screen, fuente, fuente_titulo, input_texto):
 
     pygame.display.flip()
 
-# --- Main pygame ---
+# Main pygame
 
 def main():
     global sock, esperando

@@ -1,1 +1,1 @@
-# Paquete de clases para Guerra Galáctica
+# Paquete de clases

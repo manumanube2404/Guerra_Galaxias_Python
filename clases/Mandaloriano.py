@@ -4,14 +4,13 @@ from clases.Nave import Unidad
 
 
 class Mandaloriano(Unidad):
-    """Soldado mandaloriano con estadísticas de ataque, defensa y coste."""
+    # Soldado mandaloriano con estadísticas de ataque, defensa y coste.
     def __init__(self, nivel, ataque, defensa, vida, velocidad, coste):
         nombre = f"Mandaloriano {nivel}"
         super().__init__(nombre, ataque, defensa, vida, velocidad, coste)
         self.nivel = nivel
 
     def esta_vivo(self):
-        """Compatibilidad con el resto del juego."""
         return self.esta_viva()
 
     def __str__(self):
@@ -28,6 +27,6 @@ STATS_MANDALORIANOS = {
 
 
 def crear_mandaloriano(nivel):
-    """Crea y devuelve un Mandaloriano del nivel indicado."""
+    # Crea y devuelve un Mandaloriano del nivel indicado.
     stats = STATS_MANDALORIANOS[nivel]
     return Mandaloriano(nivel, *stats)

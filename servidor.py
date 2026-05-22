@@ -11,8 +11,6 @@ HOST = '127.0.0.1'
 PORT = 65432
 MAX_CREDITOS = 100000
 
-# --- Utilidades de comunicación ---
-
 def enviar(conn, mensaje):
     conn.sendall((mensaje + "\n").encode())
 
@@ -30,7 +28,7 @@ def recibir(conn):
             return linea.decode().strip()
     return ""
 
-# --- Configuración del reino de cada cliente ---
+# Configuración del reino de cada cliente
 
 def configurar_reino(conn, numero):
     enviar(conn, "Introduce nombre de tu Reino:")
@@ -90,7 +88,7 @@ def configurar_reino(conn, numero):
     enviar(conn, "Configuración recibida. En breve comienza la batalla...")
     return reino
 
-# --- Lógica de batalla por turnos ---
+# Lógica de batalla por turnos
 
 def simular_batalla(reino1, reino2, conn1, conn2):
     def broadcast(msg):
@@ -165,7 +163,7 @@ def simular_batalla(reino1, reino2, conn1, conn2):
     except Exception:
         pass
 
-# --- Gestión de conexiones ---
+# Conexiones
 
 def iniciar_guerra():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -211,11 +209,11 @@ def iniciar_guerra():
     for conn in conexiones:
         conn.close()
 
-# --- Menú principal del servidor ---
+# Menú principal del servidor
 
 def main():
     while True:
-        print("\n LA GUERRA DE LAS GALAXIAS ")
+        print("\n SERVIDOR - LA GUERRA DE LAS GALAXIAS ")
         print("1. Iniciar Guerra")
         print("2. Finalizar Servidor")
         opcion = input("Seleccionar opción para continuar: ").strip()

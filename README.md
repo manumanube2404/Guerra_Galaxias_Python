@@ -1,29 +1,27 @@
 # La Guerra de las Galaxias 2026
 
-## Estructura 
+# Estructura
 
-- `servidor.py` - punto de entrada del servidor.
-- `cliente.py` - cliente de texto para participar en la partida.
-- `cliente_pygame.py` - cliente gráfico basado en Pygame.
-- `clases/` - módulo que contiene las clases del juego:
+- `servidor.py`
+- `cliente.py`
+- `cliente_pygame.py`
+- `clases/`
   - `Nave.py`
   - `Mandaloriano.py`
   - `Reino.py`
 
-## Ejecución
+# Ejecución
 
 1. Ejecuta primero el servidor:
-   ```bash
-   python servidor.py
-   ```
+
+      `python servidor.py`
+
 
 2. Ejecuta dos clientes en otras terminales:
-   ```bash
-   python cliente.py
-   ```
+
+      `python cliente.py`
+
    o
-   ```bash
-   python cliente_pygame.py
-   ```
+      `python cliente_pygame.py`
 
 3. Sigue las instrucciones de cada cliente para configurar los reinos y comenzar la batalla.
