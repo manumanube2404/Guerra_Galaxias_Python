@@ -102,13 +102,13 @@ def simular_batalla(reino1, reino2, conn1, conn2):
             except Exception:
                 pass
 
-    broadcast(f"\n=== CAMPO DE BATALLA GALÁCTICO ===")
-    broadcast(f"=== BATALLA: {reino1.nombre} vs {reino2.nombre} ===")
+    broadcast(f"\n CAMPO DE BATALLA GALÁCTICO ")
+    broadcast(f" BATALLA: {reino1.nombre} vs {reino2.nombre} ")
 
     turno = 0
     while reino1.sigue_en_pie() and reino2.sigue_en_pie():
         turno += 1
-        broadcast(f"\n=== TURNO {turno} ===")
+        broadcast(f"\n TURNO {turno} ")
         broadcast("COMIENZA LA FASE DE ATAQUES")
 
         atacantes = reino1.unidades_vivas() + reino2.unidades_vivas()
@@ -146,7 +146,7 @@ def simular_batalla(reino1, reino2, conn1, conn2):
         broadcast(f"| {reino1.nombre:<20} | {len(reino1.naves_vivas()):^6} | {len(reino1.mandalorianos_vivos()):^13} |")
         broadcast(f"| {reino2.nombre:<20} | {len(reino2.naves_vivas()):^6} | {len(reino2.mandalorianos_vivos()):^13} |")
 
-    broadcast(f"\n=== RESULTADO FINAL DE LA GUERRA ===")
+    broadcast(f"\n RESULTADO FINAL DE LA GUERRA ")
     ganador, perdedor = (reino1, reino2) if reino1.sigue_en_pie() else (reino2, reino1)
     broadcast(f"GANADOR: {ganador.nombre}")
     broadcast(f"\nESTADÍSTICAS DE LA BATALLA:")
@@ -215,7 +215,7 @@ def iniciar_guerra():
 
 def main():
     while True:
-        print("\n=== SERVIDOR - LA GUERRA DE LAS GALAXIAS (2026) ===")
+        print("\n LA GUERRA DE LAS GALAXIAS ")
         print("1. Iniciar Guerra")
         print("2. Finalizar Servidor")
         opcion = input("Seleccionar opción para continuar: ").strip()

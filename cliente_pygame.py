@@ -15,7 +15,7 @@ ROJO      = (220, 70, 70)
 VERDE     = (80, 220, 120)
 AZUL_OSC  = (10, 10, 40)
 
-ANCHO, ALTO = 900, 850
+ANCHO, ALTO = 900, 650
 MAX_LINEAS  = 22       # líneas visibles en el log
 FUENTE_TAM  = 18
 
@@ -37,7 +37,7 @@ def hilo_red():
             chunk = sock.recv(1024)
             if not chunk:
                 with lock:
-                    mensajes.append(">> Conexión cerrada por el servidor.")
+                    mensajes.append("Conexión cerrada por el servidor...")
                 break
             buffer += chunk
             while b"\n" in buffer:
@@ -62,7 +62,7 @@ def hilo_red():
 def dibujar(screen, fuente, fuente_titulo, input_texto):
     screen.fill(AZUL_OSC)
 
-    titulo = fuente_titulo.render("⚔ LA GUERRA DE LAS GALAXIAS 2026 ⚔", True, AMARILLO)
+    titulo = fuente_titulo.render("LA GUERRA DE LAS GALAXIAS 2026", True, AMARILLO)
     screen.blit(titulo, (ANCHO // 2 - titulo.get_width() // 2, 10))
     pygame.draw.line(screen, AMARILLO, (20, 48), (ANCHO - 20, 48), 2)
 
