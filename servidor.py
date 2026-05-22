@@ -16,7 +16,7 @@ def enviar(conn, mensaje):
 
 
 def recibir(conn):
-    """Lee una línea completa desde el socket y devuelve el texto sin saltos."""
+    # Lee una línea completa desde el socket y devuelve el texto sin saltos.
     buffer = b""
     while True:
         chunk = conn.recv(1024)
