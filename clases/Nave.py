@@ -15,11 +15,11 @@ class Unidad:
         # Devuelve True si la unidad aún tiene vida.
         return self.vida > 0
 
-    def recibir_danio(self, danio):
+    def recibir_daño(self, daño):
         # Aplica daño, resta defensa y actualiza la vida.
-        danio_real = max(0, danio - self.defensa // 2)
-        self.vida = max(0, self.vida - danio_real)
-        return danio_real
+        daño_real = max(0, daño - self.defensa // 2)
+        self.vida = max(0, self.vida - daño_real)
+        return daño_real
 
     def atacar(self):
         # Calcula cuántos puntos de daño hace este ataque.

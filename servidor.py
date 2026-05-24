@@ -131,12 +131,12 @@ def simular_batalla(reino1, reino2, conn1, conn2):
                 break
 
             objetivo = random.choice(objetivos)
-            danio = atacante.atacar()
-            danio_real = objetivo.recibir_danio(danio)
+            daño = atacante.atacar()
+            daño_real = objetivo.recibir_daño(daño)
             muerto = not objetivo.esta_viva()
             estado = "DESTRUIDO/ELIMINADO" if muerto else f"HERIDO (Vida: {objetivo.vida}/{objetivo.vida_max})"
 
-            broadcast(f"{contador}. {atacante.nombre} ({atacante_reino[:3]}) -> {objetivo.nombre} ({defensa_reino[:3]}) [DAÑO: {danio_real}] - {estado}")
+            broadcast(f"{contador}. {atacante.nombre} ({atacante_reino[:3]}) -> {objetivo.nombre} ({defensa_reino[:3]}) [DAÑO: {daño_real}] - {estado}")
             contador += 1
 
         broadcast(f"\nESTADO TURNO {turno}:")

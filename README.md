@@ -1,5 +1,3 @@
-# La Guerra de las Galaxias 2026
-
 # Estructura
 
 - `servidor.py`
